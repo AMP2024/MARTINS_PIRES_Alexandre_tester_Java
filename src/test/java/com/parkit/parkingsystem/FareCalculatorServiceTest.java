@@ -19,12 +19,12 @@ public class FareCalculatorServiceTest {
     private Ticket ticket;
 
     @BeforeAll
-    private static void setUp() {
+    public static void setUp() {
         fareCalculatorService = new FareCalculatorService();
     }
 
     @BeforeEach
-    private void setUpPerTest() {
+    public void setUpPerTest() {
         ticket = new Ticket();
     }
 
@@ -123,5 +123,36 @@ public class FareCalculatorServiceTest {
         fareCalculatorService.calculateFare(ticket);
         assertEquals( (24 * Fare.CAR_RATE_PER_HOUR) , ticket.getPrice());
     }
+
+    //Test pour une voiture avec moins de 30 minutes de stationnement
+    @Test
+    public void calculateFareCarWithLessThan30minutesParkingTime() {
+        FareCalculatorService fareCalculatorService = new FareCalculatorService();
+        Ticket ticket = new Ticket();
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+        ticket.setParkingSpot(parkingSpot);
+        ticket.setInTime(new Date(System.currentTimeMillis() - (29 * 60 * 1000))); // Il y a moins de 30 minutes
+        ticket.setOutTime(new Date(System.currentTimeMillis())); // Définir l'heure à l'heure actuelle
+
+        fareCalculatorService.calculateFare(ticket);
+
+        assertEquals(0.0, ticket.getPrice());
+    }
+
+    //Test pour une moto avec moins de 30 minutes de stationnement
+    @Test
+    public void calculateFareBikeWithLessThan30minutesParkingTime() {
+        FareCalculatorService fareCalculatorService = new FareCalculatorService();
+        Ticket ticket = new Ticket();
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.BIKE, false);
+        ticket.setParkingSpot(parkingSpot);
+        ticket.setInTime(new Date(System.currentTimeMillis() - (29 * 60 * 1000))); // Il y a moins de 30 minutes
+        ticket.setOutTime(new Date(System.currentTimeMillis())); // Définir l'heure à l'heure actuelle
+
+        fareCalculatorService.calculateFare(ticket);
+
+        assertEquals(0.0, ticket.getPrice());
+    }
+
 
 }
