@@ -155,4 +155,34 @@ public class FareCalculatorServiceTest {
     }
 
 
+    @Test
+    public void calculateFareCarWithDiscount() {
+
+        FareCalculatorService fareCalculatorService = new FareCalculatorService();
+        Ticket ticket = new Ticket();
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+        ticket.setParkingSpot(parkingSpot);
+        ticket.setInTime(new Date(System.currentTimeMillis() - (45 * 60 * 1000))); // Plus de 30 minutes
+        ticket.setOutTime(new Date(System.currentTimeMillis()));
+        fareCalculatorService.calculateFare(ticket, true);
+
+        double expectedPrice = 0.95 * Fare.CAR_RATE_PER_HOUR * 0.75; // 95% du tarif plein pour plus de 30 minutes
+        assertEquals(expectedPrice, ticket.getPrice());
+    }
+
+    @Test
+    public void calculateFareBikeWithDiscount() {
+
+        FareCalculatorService fareCalculatorService = new FareCalculatorService();
+        Ticket ticket = new Ticket();
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.BIKE, false);
+        ticket.setParkingSpot(parkingSpot);
+        ticket.setInTime(new Date(System.currentTimeMillis() - (45 * 60 * 1000))); // Plus de 30 minutes
+        ticket.setOutTime(new Date(System.currentTimeMillis()));
+        fareCalculatorService.calculateFare(ticket, true);
+
+        double expectedPrice = 0.95 * Fare.BIKE_RATE_PER_HOUR * 0.75; // 95% du tarif plein pour plus de 30 minutes
+        assertEquals(expectedPrice, ticket.getPrice());
+    }
+
 }
