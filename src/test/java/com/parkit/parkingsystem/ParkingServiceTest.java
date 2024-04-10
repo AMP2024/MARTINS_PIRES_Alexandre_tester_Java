@@ -25,7 +25,6 @@ import com.parkit.parkingsystem.util.InputReaderUtil;
 @ExtendWith(MockitoExtension.class)
 public class ParkingServiceTest {
 
-    private ParkingSpot parkingSpot;
     private Ticket ticket;
     private ParkingService parkingService;
 
@@ -39,7 +38,7 @@ public class ParkingServiceTest {
     @BeforeEach
     public void setUpPerTest() {
         // Initialization of the parking spot and the ticket only once
-        parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
         ticket = new Ticket();
         ticket.setInTime(new Date(System.currentTimeMillis() - (60 * 60 * 1000)));
         ticket.setParkingSpot(parkingSpot);
@@ -54,7 +53,7 @@ public class ParkingServiceTest {
         when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
 
         // Simulate the behavior of TicketDAO to return the ticket
-        when(ticketDAO.getIncomingTicket(anyString())).thenReturn(ticket);
+        when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
         when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(true);
 
         // Simulate behavior of ParkingSpotDAO to return true for updateParking method
@@ -79,9 +78,10 @@ public class ParkingServiceTest {
         verify(ticketDAO, times(1)).getNbTicket(anyString());
 
         // Verify that getIncomingTicket was called twice
-        verify(ticketDAO, times(1)).getIncomingTicket(anyString());
+        verify(ticketDAO, times(1)).getTicket(anyString());
 
         assertTrue(ticket.getParkingSpot().isAvailable(), "Parking Spot was not freed up by the system");
+
         // Check if the OutTime for the ticket is not null
         assertNotNull(ticket.getOutTime(), "Out time for ticket is null");
 
@@ -124,7 +124,7 @@ public class ParkingServiceTest {
         when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
 
         // Simulate the behavior of TicketDAO to return the ticket
-        when(ticketDAO.getIncomingTicket(anyString())).thenReturn(ticket);
+        when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
 
         // Simulating the behavior of TicketDAO to return false when calling the updateTicket method
         when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(false);
@@ -136,7 +136,7 @@ public class ParkingServiceTest {
         parkingService.processExitingVehicle();
 
         // Check that TicketDAO's getIncomingTicket method is called once with the correct vehicle registration number
-        verify(ticketDAO, times(1)).getIncomingTicket(eq("ABCDEF"));
+        verify(ticketDAO, times(1)).getTicket(eq("ABCDEF"));
 
         // Check that TicketDAO's getNbTicket method is called once with the correct vehicle registration number
         verify(ticketDAO, times(1)).getNbTicket(eq("ABCDEF"));

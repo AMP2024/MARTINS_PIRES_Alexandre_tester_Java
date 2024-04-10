@@ -72,34 +72,31 @@ public class TicketDAO {
         return false;
     }
 
-    public Ticket getIncomingTicket(String vehicleRegNumber) {
+    //Rewritten version with ps.executeUpdate() instead of ps.execute()
+    public boolean updateTicket(Ticket ticket) {
         Connection con = null;
-        Ticket ticket = null;
+        boolean updateResult = false;
+
         try {
             con = dataBaseConfig.getConnection();
-            PreparedStatement ps = con.prepareStatement(DBConstants.GET_INCOMING_TICKET);
-            ps.setString(1, vehicleRegNumber);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                ticket = new Ticket();
-                ParkingSpot parkingSpot = new ParkingSpot(rs.getInt(1), ParkingType.valueOf(rs.getString(6)), false);
-                ticket.setParkingSpot(parkingSpot);
-                ticket.setId(rs.getInt(2));
-                ticket.setVehicleRegNumber(vehicleRegNumber);
-                ticket.setPrice(rs.getDouble(3));
-                ticket.setInTime(rs.getTimestamp(4));
-                ticket.setOutTime(rs.getTimestamp(5));
+            PreparedStatement ps = con.prepareStatement(DBConstants.UPDATE_TICKET);
+            ps.setDouble(1, ticket.getPrice());
+            ps.setTimestamp(2, new Timestamp(ticket.getOutTime().getTime()));
+            ps.setInt(3, ticket.getId());
+
+            int rowsUpdated = ps.executeUpdate();
+
+            if (rowsUpdated > 0) {
+                updateResult = true;
             }
-            dataBaseConfig.closeResultSet(rs);
-            dataBaseConfig.closePreparedStatement(ps);
         } catch (Exception ex) {
-            logger.error("Error fetching next available slot", ex);
+            logger.error("Error saving ticket info", ex);
         } finally {
             dataBaseConfig.closeConnection(con);
         }
-        return ticket;
-    }
 
+        return updateResult;
+    }
 
     public Ticket getTicket(String vehicleRegNumber) {
         Connection con = null;
@@ -130,32 +127,6 @@ public class TicketDAO {
         return ticket;
     }
 
-    //Rewritten version with ps.executeUpdate() instead of ps.execute()
-    public boolean updateTicket(Ticket ticket) {
-        Connection con = null;
-        boolean updateResult = false;
-
-        try {
-            con = dataBaseConfig.getConnection();
-            PreparedStatement ps = con.prepareStatement(DBConstants.UPDATE_TICKET);
-            ps.setDouble(1, ticket.getPrice());
-            ps.setTimestamp(2, new Timestamp(ticket.getOutTime().getTime()));
-            ps.setInt(3, ticket.getId());
-
-            int rowsUpdated = ps.executeUpdate();
-
-            if (rowsUpdated > 0) {
-                updateResult = true;
-            }
-        } catch (Exception ex) {
-            logger.error("Error saving ticket info", ex);
-        } finally {
-            dataBaseConfig.closeConnection(con);
-        }
-
-        return updateResult;
-    }
-
     public int getNbTicket(String vehicleRegNumber) {
         Connection con = null;
         PreparedStatement ps = null;
@@ -172,7 +143,7 @@ public class TicketDAO {
                 nbTicket = rs.getInt(1);
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.error("Error occurred", ex);
         } finally {
             dataBaseConfig.closeResultSet(rs);
             dataBaseConfig.closePreparedStatement(ps);
