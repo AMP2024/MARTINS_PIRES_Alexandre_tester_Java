@@ -143,6 +143,16 @@
 						<goals>
 							<goal>report</goal>
 						</goals>
+						<configuration>
+							<excludes>
+								<exclude>**/model/*</exclude>
+								<exclude>**/constants/*</exclude>
+								<exclude>**/DBConstants.*</exclude>
+								<exclude>**/Fare.*</exclude>
+								<exclude>**/DataBaseConfig.*</exclude>
+								<exclude>**/DataBaseTestConfig.*</exclude>
+							</excludes>
+						</configuration>
 					</execution>
 					<execution>
 						<id>pre-integration-tests</id>

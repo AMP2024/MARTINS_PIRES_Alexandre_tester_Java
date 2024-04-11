@@ -48,7 +48,7 @@ public class ParkingServiceTest {
     }
 
     @Test
-    public void processExitingVehicleTest() throws Exception {
+    public void processExitingVehicleTest() {
         // Simulate the entry of the vehicle registration number
         when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
 
@@ -66,7 +66,7 @@ public class ParkingServiceTest {
         parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
 
         // Calling the method to be tested
-        parkingService.processExitingVehicle();
+        parkingService.processExitingVehicle(false);
 
         // Verify that updateTicket was called once
         verify(ticketDAO, times(1)).updateTicket(any(Ticket.class));
@@ -88,7 +88,7 @@ public class ParkingServiceTest {
     }
 
     @Test
-    public void testProcessIncomingVehicle() throws Exception {
+    public void testProcessIncomingVehicle() {
         // Simulate the entry of vehicle sighting
         when(inputReaderUtil.readSelection()).thenReturn(1);
 
@@ -105,7 +105,7 @@ public class ParkingServiceTest {
         when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(true);// MODIFICATION ADD
 
         // Calling the method to be tested
-        parkingService.processIncomingVehicle();
+        parkingService.processIncomingVehicle(false);
 
         // Verifying that the updateParking method of ParkingSpotDAO is called once
         verify(parkingSpotDAO, times(1)).updateParking(any(ParkingSpot.class));
@@ -119,7 +119,7 @@ public class ParkingServiceTest {
     }
 
     @Test
-    public void processExitingVehicleTestUnableUpdate() throws Exception {
+    public void processExitingVehicleTestUnableUpdate() {
         // Simulate the entry of the vehicle registration number
         when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
 
@@ -133,7 +133,7 @@ public class ParkingServiceTest {
         when(ticketDAO.getNbTicket(anyString())).thenReturn(1);
 
         // Calling the method to be tested
-        parkingService.processExitingVehicle();
+        parkingService.processExitingVehicle(false);
 
         // Check that TicketDAO's getIncomingTicket method is called once with the correct vehicle registration number
         verify(ticketDAO, times(1)).getTicket(eq("ABCDEF"));
@@ -200,5 +200,82 @@ public class ParkingServiceTest {
         // Check that ParkingSpotDAO's getNextAvailableSlot method is not called
         verify(parkingSpotDAO, never()).getNextAvailableSlot(any(ParkingType.class));
     }
+
+    // New Tests
+
+    @Test
+    public void getVehicleTypeTest() {
+        when(inputReaderUtil.readSelection()).thenReturn(1);
+        assertEquals(ParkingType.CAR, parkingService.getVehicleType(), "Expected vehicle type is CAR");
+
+        when(inputReaderUtil.readSelection()).thenReturn(2);
+        assertEquals(ParkingType.BIKE, parkingService.getVehicleType(), "Expected vehicle type is BIKE");
+    }
+
+    @Test
+    public void getVehicleTypeTestForInvalidInput() {
+        when(inputReaderUtil.readSelection()).thenReturn(3);
+        assertThrows(IllegalArgumentException.class, () -> parkingService.getVehicleType(),
+                "Expected IllegalArgumentException for invalid input");
+    }
+
+    @Test
+    public void testProcessIncomingVehicleWhenParkingSpotIsNull() {
+        when(inputReaderUtil.readSelection()).thenReturn(1);
+        when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(0);
+        parkingService.processIncomingVehicle(false);
+        verify(parkingSpotDAO, times(0)).updateParking(any(ParkingSpot.class));
+    }
+
+    @Test
+    public void testProcessIncomingVehicleWhenVehicleRegNumberIsEmpty() {
+        when(inputReaderUtil.readSelection()).thenReturn(1);
+        when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(1);
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("");
+        parkingService.processIncomingVehicle(false);
+        verify(parkingSpotDAO, times(0)).updateParking(any(ParkingSpot.class));
+    }
+
+    @Test
+    public void testProcessIncomingVehicleWhenParkingSpotUpdateFails() {
+        when(inputReaderUtil.readSelection()).thenReturn(1);
+        when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(1);
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
+        when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(false);
+        parkingService.processIncomingVehicle(false);
+        verify(parkingSpotDAO, times(1)).updateParking(any(ParkingSpot.class));
+        verify(ticketDAO, times(0)).saveTicket(any(Ticket.class));
+    }
+
+    @Test
+    public void testProcessIncomingVehicleWhenTicketSaveFails() {
+        when(inputReaderUtil.readSelection()).thenReturn(1);
+        when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(1);
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
+        when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(true);
+        when(ticketDAO.saveTicket(any(Ticket.class))).thenReturn(false);
+        parkingService.processIncomingVehicle(false);
+        verify(parkingSpotDAO, times(1)).updateParking(any(ParkingSpot.class));
+        verify(ticketDAO, times(1)).saveTicket(any(Ticket.class));
+    }
+
+    @Test
+    public void testProcessExitingVehicleWhenTicketNotFound() {
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
+        when(ticketDAO.getTicket("ABCDEF")).thenReturn(null);
+        parkingService.processExitingVehicle(false);
+        verify(ticketDAO, times(0)).updateTicket(any(Ticket.class));
+    }
+
+    @Test
+    public void testProcessExitingVehicleWhenTicketUpdateFails() {
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
+        when(ticketDAO.getTicket("ABCDEF")).thenReturn(ticket);
+        when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(false);
+        parkingService.processExitingVehicle(false);
+        verify(ticketDAO, times(1)).getTicket("ABCDEF");
+        verify(ticketDAO, times(1)).updateTicket(ticket);
+    }
+
 
 }
