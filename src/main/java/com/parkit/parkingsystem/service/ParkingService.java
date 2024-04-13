@@ -12,17 +12,40 @@ import com.parkit.parkingsystem.model.ParkingSpot;
 import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.util.InputReaderUtil;
 
-import static com.parkit.parkingsystem.constants.DBConstants.IN_TIME_TEST;
-import static com.parkit.parkingsystem.constants.DBConstants.OUT_TIME_TEST;
+import static com.parkit.parkingsystem.constants.TestConstants.IN_TIME_TEST;
+import static com.parkit.parkingsystem.constants.TestConstants.OUT_TIME_TEST;
 
+/**
+ * This class represents a parking service that manages the parking spots and tickets.
+ * The ParkingService class is responsible for handling the incoming and exiting vehicles in a parking lot.
+ */
 public class ParkingService {
 
+    /**
+     * The Logger object, associated with the "ParkingService",
+     * is responsible for logging messages specific to this component of the system or application.
+     */
     private static final Logger logger = LogManager.getLogger("ParkingService");
 
+    /**
+     * The FareCalculatorService class provides methods to calculate the parking fare based on the parking duration.
+     */
     private static final FareCalculatorService fareCalculatorService = new FareCalculatorService(); //
 
+    /**
+     * The InputReaderUtil class is used to handle user input.
+     * It provides methods that read the user's input from the console.
+     */
     private final InputReaderUtil inputReaderUtil;
+
+    /**
+     * The ParkingSpotDAO class is responsible for accessing and updating parking spot information in the database.
+     */
     private final ParkingSpotDAO parkingSpotDAO;
+
+    /**
+     * The TicketDAO class provides methods for saving, updating, and retrieving parking tickets from the database.
+     */
     private final TicketDAO ticketDAO;
 
     public ParkingService(InputReaderUtil inputReaderUtil, ParkingSpotDAO parkingSpotDAO, TicketDAO ticketDAO) {
@@ -31,6 +54,11 @@ public class ParkingService {
         this.ticketDAO = ticketDAO;
     }
 
+    /**
+     * Processes the incoming vehicle.
+     *
+     * @param test A boolean indicating whether the method is being called for a test or not.
+     */
     public void processIncomingVehicle(boolean test) {
         try {
             ParkingSpot parkingSpot = getNextParkingNumberIfAvailable();
@@ -88,15 +116,29 @@ public class ParkingService {
         }
     }
 
+    /**
+     * Processes the incoming vehicle when calling the method without an argument.
+     * Call the method with the Boolean 'test' set to false.
+     */
     public void processIncomingVehicle() {
         processIncomingVehicle(false);
     }
 
+    /**
+     * Retrieves the vehicle registration number entered by the user.
+     *
+     * @return The vehicle registration number entered by the user.
+     */
     private String getVehicleRegNumber() {
         System.out.println("Please type the vehicle registration number and press enter key");
         return inputReaderUtil.readVehicleRegistrationNumber();
     }
 
+    /**
+     * Retrieves the next available parking spot if it is available.
+     *
+     * @return The next available parking spot, or null if no spot is available.
+     */
     public ParkingSpot getNextParkingNumberIfAvailable() {
         int parkingNumber;
         ParkingSpot parkingSpot = null;
@@ -116,6 +158,11 @@ public class ParkingService {
         return parkingSpot;
     }
 
+    /**
+     * Processes the exiting vehicle.
+     *
+     * @param test A boolean indicating whether the method is being called for a test or not.
+     */
     public void processExitingVehicle(boolean test) {
         try {
             boolean isRecurringUser;
@@ -161,10 +208,20 @@ public class ParkingService {
         }
     }
 
+    /**
+     * Processes the exiting vehicle when calling the method without an argument.
+     * Call the method with the Boolean 'test' set to false.
+     */
     public void processExitingVehicle() {
         processExitingVehicle(false);
     }
 
+    /**
+     * Retrieves the selected vehicle type from the user.
+     *
+     * @return The selected vehicle type as a ParkingType enum value.
+     * @throws IllegalArgumentException If an incorrect input is provided by the user.
+     */
     public ParkingType getVehicleType() {
         System.out.println("\nPlease select vehicle type from menu");
         System.out.println("\n1 CAR");

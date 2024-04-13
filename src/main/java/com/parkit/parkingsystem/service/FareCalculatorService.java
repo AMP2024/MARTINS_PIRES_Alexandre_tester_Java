@@ -5,8 +5,20 @@ import com.parkit.parkingsystem.model.Ticket;
 
 import static com.parkit.parkingsystem.constants.Fare.MINIMUM_DURATION_FOR_CHARGE;
 
+/**
+ * The FareCalculatorService class is responsible for calculating the fare for a parking ticket based on the
+ * duration of parking and the type of vehicle.
+ */
 public class FareCalculatorService {
 
+    /**
+     * Calculates the fare for a parking ticket based on the duration of parking and the type of vehicle.
+     *
+     * @param ticket   The parking ticket
+     * @param discount A boolean value indicating whether a discount should be applied or not
+     * @throws IllegalArgumentException If the out time provided is incorrect
+     * @throws IllegalArgumentException If the parking type is unknown
+     */
     public void calculateFare(Ticket ticket, boolean discount) {
         if ((ticket.getOutTime() == null) || (ticket.getOutTime().before(ticket.getInTime()))) {
             throw new IllegalArgumentException("Out time provided is incorrect:" + ticket.getOutTime().toString());

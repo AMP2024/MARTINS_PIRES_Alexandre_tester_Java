@@ -6,11 +6,26 @@ import org.apache.logging.log4j.LogManager;
 
 import java.sql.Connection;
 
+/**
+ * The DataBasePrepareService class is responsible for clearing the entries in the database.
+ * It provides a method to clear the parking and ticket entries in the database.
+ */
 public class DataBasePrepareService {
 
+    /**
+     * This is a logger instance used for logging messages, it is associated with the DataBasePrepareService class.
+     * LogManager.getLogger(DataBasePrepareService.class) is used to initialize this logger.
+     */
     private static final Logger logger = LogManager.getLogger(DataBasePrepareService.class);
+
+    /**
+     * The DataBaseTestConfig class provides methods for managing database connections and closing resources specifically during the execution of integration tests.
+     */
     DataBaseTestConfig dataBaseTestConfig = new DataBaseTestConfig();
 
+    /**
+     * Clears the entries in the database by setting parking entries to available and clearing ticket entries.
+     */
     public void clearDataBaseEntries(){
         Connection connection = null;
         try{
@@ -23,7 +38,7 @@ public class DataBasePrepareService {
             connection.prepareStatement("truncate table ticket").execute();
 
         }catch(Exception e){
-            logger.error("Une erreur est survenue lors de la liaison à la base de données", e);
+            logger.error("An error occurred while connecting to the database", e);
         }finally {
             dataBaseTestConfig.closeConnection(connection);
         }

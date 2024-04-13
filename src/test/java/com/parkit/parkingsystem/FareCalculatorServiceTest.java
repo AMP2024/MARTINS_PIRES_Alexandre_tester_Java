@@ -15,22 +15,47 @@ import com.parkit.parkingsystem.model.ParkingSpot;
 import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.FareCalculatorService;
 
+/**
+ * This class is responsible for testing the parking fare calculations.
+ */
 public class FareCalculatorServiceTest {
 
+	/**
+	 * Millisecond values for various durations used across several tests.
+	 */
 	private static final int ONE_HOUR_IN_MILLISECONDS = 60 * 60 * 1000;
 	private static final int THIRTY_MINUTES_IN_MSEC = 30 * 60 * 1000;
 	private static final int FORTYFIVE_MINUTES_IN_MSEC = 45 * 60 * 1000;
 
+	/**
+	 * FareCalculatorService instance used across all the tests.
+	 */
 	private static FareCalculatorService fareCalculatorService;
+
+	/**
+	 * Ticket instance used across all the tests.
+	 */
 	private Ticket ticket;
+
+	/**
+	 * In and out times used on each test's ticket instance.
+	 */
 	private Date inTime;
 	private Date outTime;
 
+	/**
+	 * Sets up common settings for all tests.
+	 * Instantiates a new FareCalculatorService object.
+	 */
     @BeforeAll
 	public static void setUp() {
 		fareCalculatorService = new FareCalculatorService();
 	}
 
+	/**
+	 * Sets up settings for each test.
+	 * Instantiates a new Ticket object, and sets out time as the current time.
+	 */
 	@BeforeEach
 	public void setUpPerTest() {
 		ticket = new Ticket();
@@ -38,6 +63,11 @@ public class FareCalculatorServiceTest {
 		outTime = new Date(System.currentTimeMillis());
 	}
 
+
+	/**
+	 * This method performs common setup for many tests - it creates a ParkingSpot of specified type,
+	 * sets in and out times on the ticket, and assigns the parking spot to the ticket.
+	 */
 	private void setupTicketAndParkingSpot(ParkingType parkingType) {
 		ParkingSpot parkingSpot = new ParkingSpot(1, parkingType, false);
 
@@ -46,6 +76,9 @@ public class FareCalculatorServiceTest {
 		ticket.setParkingSpot(parkingSpot);
 	}
 
+	/**
+	 * A test case for parking fare calculation for cars.
+	 */
 	@Test
 	public void calculateFareCar() {
 
@@ -58,6 +91,9 @@ public class FareCalculatorServiceTest {
 		assertEquals(ticket.getPrice(), Fare.CAR_RATE_PER_HOUR, "Failed to calculate fare for car parking correctly");
 	}
 
+	/**
+	 * Test calculates parking fare for a bike with a parking duration of 1 hour.
+	 */
 	@Test
 	public void calculateFareBike() {
 
@@ -70,6 +106,9 @@ public class FareCalculatorServiceTest {
 		assertEquals(ticket.getPrice(), Fare.BIKE_RATE_PER_HOUR, "Failed to calculate fare for bike parking correctly");
 	}
 
+	/**
+	 * Test calculates parking fare for an unknown vehicle type.
+	 */
 	@Test
 	public void calculateFareUnkownType() {
 
@@ -80,6 +119,9 @@ public class FareCalculatorServiceTest {
 		assertThrows(NullPointerException.class, () -> fareCalculatorService.calculateFare(ticket), "Expected NullPointerException was not thrown for unknown parking type");
 	}
 
+	/**
+	 * Test calculates parking fare for a bike with an entry time in the future.
+	 */
 	@Test
 	public void calculateFareBikeWithFutureInTime() {
 
@@ -90,6 +132,9 @@ public class FareCalculatorServiceTest {
 		assertThrows(IllegalArgumentException.class, () -> fareCalculatorService.calculateFare(ticket), "Expected IllegalArgumentException was not thrown for future in time for bike");
 	}
 
+	/**
+	 * Test calculates parking fare for a bike with parking duration of less than 1 hour.
+	 */
 	@Test
 	public void calculateFareBikeWithLessThanOneHourParkingTime() {
 
@@ -105,6 +150,9 @@ public class FareCalculatorServiceTest {
 		assertEquals(expectedPrice, ticket.getPrice(), 0.01, "Failed to calculate fare for bike parking less than an hour correctly");
 	}
 
+	/**
+	 * Test calculates parking fare for a car with parking duration of less than 1 hour.
+	 */
 	@Test
 	public void calculateFareCarWithLessThanOneHourParkingTime() {
 
@@ -120,6 +168,9 @@ public class FareCalculatorServiceTest {
 		assertEquals(expectedPrice, ticket.getPrice(), 0.01, "Failed to calculate fare for car parking less than an hour correctly");
 	}
 
+	/**
+	 * Test calculates parking fare for a car with parking duration longer than a day.
+	 */
 	@Test
 	public void calculateFareCarWithMoreThanADayParkingTime() {
 
@@ -132,6 +183,9 @@ public class FareCalculatorServiceTest {
 		assertEquals((24 * Fare.CAR_RATE_PER_HOUR), ticket.getPrice(), 0.01, "Failed to calculate fare for car parking more than a day correctly");
 	}
 
+	/**
+	 * Test calculates parking fare for a car with parking duration of less than 30 minutes.
+	 */
 	@Test
 	public void calculateFareCarWithLessThan30minutesParkingTime() {
 
@@ -145,6 +199,9 @@ public class FareCalculatorServiceTest {
 
 	}
 
+	/**
+	 * Test calculates parking fare for a bike with parking duration of less than 30 minutes.
+	 */
 	@Test
 	public void calculateFareBikeWithLessThan30minutesParkingTime() {
 
@@ -157,6 +214,9 @@ public class FareCalculatorServiceTest {
 		assertEquals(0.0, ticket.getPrice(), 0.01, "Failed to calculate fare for bike parking less than 30 minutes correctly");
 	}
 
+	/**
+	 * Test calculates parking fare for a car with a discount.
+	 */
 	@Test
 	public void calculateFareCarWithDiscount() {
 
@@ -172,6 +232,9 @@ public class FareCalculatorServiceTest {
 		assertEquals(expectedPrice, ticket.getPrice(), 0.01, "Failed to calculate fare with discount for car correctly");
 	}
 
+	/**
+	 * Test calculates parking fare for a bike with a discount.
+	 */
 	@Test
 	public void calculateFareBikeWithDiscount() {
 
@@ -189,6 +252,9 @@ public class FareCalculatorServiceTest {
 	}
 
 	// Test added
+	/**
+	 * Test calculates parking fare for a bike with parking duration longer than a day.
+	 */
 	@Test
 	public void calculateFareBikeWithMoreThanADayParkingTime() {
 
@@ -202,6 +268,9 @@ public class FareCalculatorServiceTest {
 	}
 
 	// Test added
+	/**
+	 * Test calculates parking fare for a car with an entry time in the future.
+	 */
 	@Test
 	public void calculateFareCarWithFutureInTime() {
 

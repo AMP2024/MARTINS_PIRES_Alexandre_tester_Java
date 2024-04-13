@@ -2,6 +2,9 @@ package com.parkit.parkingsystem.model;
 
 import java.util.Date;
 
+/**
+ * The Ticket class represents a parking ticket.
+ */
 public class Ticket {
     private int id;
     private ParkingSpot parkingSpot;
